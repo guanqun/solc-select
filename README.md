@@ -1,1 +1,1 @@
-A rust version of python's solc-select utility.
+A rust port of python's [solc-select](https://github.com/crytic/solc-select) utility.
