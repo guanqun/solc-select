@@ -1,5 +1,5 @@
 use clap::{App, SubCommand};
-use solc_select::{get_current_version, install_versions, switch_global_version};
+use solc_select::{install_versions, installed_versions, switch_global_version};
 
 fn main() {
     let matches = App::new("solc_select")
@@ -35,10 +35,13 @@ fn main() {
             switch_global_version(version).expect("failed to switch global version");
         }
         ("version", _) => {
-            println!(
-                "{}",
-                get_current_version().unwrap_or("<no-solc-installed>".to_string())
-            );
+            if let Ok(installed) = installed_versions() {
+                for version in installed {
+                    println!("{}", version);
+                }
+            } else {
+                println!("<no-solc-installed>");
+            }
         }
         _ => {
             println!("show help");

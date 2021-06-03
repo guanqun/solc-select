@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
-fn get_artifact_dir() -> PathBuf {
+pub fn get_artifact_dir() -> PathBuf {
     let mut artifacts_dir = dirs::home_dir().expect("failed to get home folder");
     artifacts_dir.push(".solc-select");
     artifacts_dir.push("artifacts");
@@ -13,6 +13,7 @@ fn get_artifact_dir() -> PathBuf {
 
 fn get_global_version_path() -> PathBuf {
     let mut global_version_path = dirs::home_dir().expect("failed to get home folder");
+    global_version_path.push(".solc-select");
     global_version_path.push("global-version");
     global_version_path
 }
@@ -89,13 +90,22 @@ pub fn get_current_version() -> Result<String> {
         .to_string())
 }
 
-fn installed_versions() -> Result<Vec<String>> {
+pub fn installed_versions() -> Result<Vec<String>> {
     let artifacts_dir = get_artifact_dir();
 
     let mut versions = vec![];
     for entry in std::fs::read_dir(artifacts_dir)? {
         let entry = entry?;
-        if let Some(version) = entry.path().to_string_lossy().strip_prefix("solc-") {
+        if let Some(version) = entry
+            .path()
+            .file_name()
+            .map(|f| {
+                f.to_string_lossy()
+                    .strip_prefix("solc-")
+                    .map(|s| s.to_string())
+            })
+            .flatten()
+        {
             versions.push(version.to_string());
         }
     }
