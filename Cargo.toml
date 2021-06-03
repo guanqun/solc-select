@@ -2,7 +2,12 @@
 authors = ["Guanqun Lu <guanqunlu@outlook.com>"]
 edition = "2018"
 name = "solc-select"
+description = "A tool to select solc version easily"
 version = "0.1.0"
+readme = "README.md"
+license = "MIT"
+keywords = ["solc", "ethereum"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 clap = "2.33.3"
