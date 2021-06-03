@@ -17,8 +17,8 @@ fn get_global_version_path() -> PathBuf {
     global_version_path
 }
 
-pub fn install_versions(to_install_versions: Vec<String>) {
-    let all = get_available_versions();
+pub fn install_versions(to_install_versions: Vec<String>) -> Result<()> {
+    let all = get_available_versions()?;
 
     if to_install_versions.is_empty() {
         println!("Available versions to install:");
@@ -27,8 +27,7 @@ pub fn install_versions(to_install_versions: Vec<String>) {
             println!("{}", version);
         }
     } else {
-        let artifact_dir = get_artifact_dir();
-        std::fs::create_dir_all(artifacts_dir).expect("failed to create artifacts.");
+        std::fs::create_dir_all(get_artifact_dir())?;
 
         for (version, artifact) in &all {
             if to_install_versions.contains(&"all".to_string())
@@ -41,10 +40,7 @@ pub fn install_versions(to_install_versions: Vec<String>) {
                     soliditylang_platform(),
                     artifact
                 );
-                let bytes = reqwest::blocking::get(url)
-                    .expect("failed to get artifact file")
-                    .bytes()
-                    .expect("failed to get artifact file");
+                let bytes = reqwest::blocking::get(url)?.bytes()?;
 
                 let mut artifact_file = get_artifact_dir();
                 artifact_file.push(format!("solc-{}", version));
@@ -64,14 +60,15 @@ pub fn install_versions(to_install_versions: Vec<String>) {
             }
         }
     }
+
+    Ok(())
 }
 
-pub fn use_version(version: &str) -> Result<()> {
+pub fn switch_global_version(version: &str) -> Result<()> {
     if installed_versions()?.contains(&version.to_string()) {
-        let global_version_path = get_global_version_path();
-        std::fs::write(global_version_path, version).expect("failed to write global-version");
+        std::fs::write(get_global_version_path(), version)?;
         println!("Switched global version to {}", version);
-    } else if get_available_versions()
+    } else if get_available_versions()?
         .keys()
         .any(|v| v.as_str() == version)
     {
@@ -86,13 +83,10 @@ pub fn use_version(version: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn get_current_version() -> Option<String> {
-    let mut global_version_path = dirs::home_dir().expect("failed to get home folder");
-    global_version_path.push("global-version");
-
-    std::fs::read_to_string(global_version_path)
-        .map(|s| s.trim().to_string())
-        .ok()
+pub fn get_current_version() -> Result<String> {
+    Ok(std::fs::read_to_string(get_global_version_path())?
+        .trim()
+        .to_string())
 }
 
 fn installed_versions() -> Result<Vec<String>> {
@@ -108,7 +102,7 @@ fn installed_versions() -> Result<Vec<String>> {
     Ok(versions)
 }
 
-pub fn get_available_versions() -> HashMap<String, String> {
+pub fn get_available_versions() -> Result<HashMap<String, String>> {
     let url = format!(
         "https://binaries.soliditylang.org/{}/list.json",
         soliditylang_platform()
@@ -119,12 +113,9 @@ pub fn get_available_versions() -> HashMap<String, String> {
         releases: HashMap<String, String>,
     }
 
-    let response: Response = reqwest::blocking::get(&url)
-        .expect("failed to get releases")
-        .json()
-        .expect("failed to get releases");
+    let response: Response = reqwest::blocking::get(&url)?.json()?;
 
-    response.releases
+    Ok(response.releases)
 }
 
 fn soliditylang_platform() -> &'static str {

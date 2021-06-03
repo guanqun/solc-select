@@ -1,5 +1,5 @@
-use clap::{App, Arg, SubCommand};
-use solc_select::{get_available_versions, get_current_version, install_versions, use_version};
+use clap::{App, SubCommand};
+use solc_select::{get_current_version, install_versions, switch_global_version};
 
 fn main() {
     let matches = App::new("solc_select")
@@ -28,16 +28,16 @@ fn main() {
             let versions: Vec<String> = matches
                 .values_of("VERSION")
                 .map_or(vec![], |versions| versions.map(|s| s.to_string()).collect());
-            install_versions(versions);
+            install_versions(versions).expect("failed to install version");
         }
         ("use", Some(matches)) => {
             let version = matches.value_of("VERSION").expect("must have VERSION");
-            use_version(version);
+            switch_global_version(version).expect("failed to switch global version");
         }
-        ("version", matches) => {
+        ("version", _) => {
             println!(
                 "{}",
-                get_current_version().unwrap_or_else(|| "<no-version-installed>".to_string())
+                get_current_version().unwrap_or("<no-solc-installed>".to_string())
             );
         }
         _ => {
