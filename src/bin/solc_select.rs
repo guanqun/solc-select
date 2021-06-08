@@ -3,7 +3,7 @@ use solc_select::{install_versions, installed_versions, switch_global_version};
 
 fn main() {
     let matches = App::new("solc_select")
-        .version("0.1.0")
+        .version("0.2.0")
         .author("Guanqun Lu <guanqunlu@outlook.com>")
         .about("Allows users to install and quickly switch between Solidity compiler versions")
         .subcommand(
