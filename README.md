@@ -24,5 +24,5 @@ solc-select use 0.8.4
 ### list current versions
 
 ```
-solc-select version
+solc-select versions
 ```

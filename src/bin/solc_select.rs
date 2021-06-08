@@ -19,7 +19,7 @@ fn main() {
                 .arg_from_usage("<VERSION> 'solc version you want to use (eg: 0.8.4)'"),
         )
         .subcommand(
-            SubCommand::with_name("version").about("prints out all installed solc versions"),
+            SubCommand::with_name("versions").about("prints out all installed solc versions"),
         )
         .get_matches();
 
@@ -34,7 +34,7 @@ fn main() {
             let version = matches.value_of("VERSION").expect("must have VERSION");
             switch_global_version(version).expect("failed to switch global version");
         }
-        ("version", _) => {
+        ("versions", _) => {
             if let Ok(installed) = installed_versions() {
                 for version in installed {
                     println!("{}", version);
