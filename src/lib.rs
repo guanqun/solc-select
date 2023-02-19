@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::io::Read;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
@@ -41,7 +42,9 @@ pub fn install_versions(to_install_versions: Vec<String>) -> Result<()> {
                     soliditylang_platform(),
                     artifact
                 );
-                let bytes = reqwest::blocking::get(url)?.bytes()?;
+                let mut bytes: Vec<u8> = Vec::new();
+                let response = ureq::get(&url).call()?;
+                response.into_reader().read_to_end(&mut bytes)?;
 
                 let mut artifact_file = get_artifact_dir();
                 artifact_file.push(format!("solc-{}", version));
@@ -123,7 +126,7 @@ pub fn get_available_versions() -> Result<HashMap<String, String>> {
         releases: HashMap<String, String>,
     }
 
-    let response: Response = reqwest::blocking::get(&url)?.json()?;
+    let response: Response = ureq::get(&url).call()?.into_json()?;
 
     Ok(response.releases)
 }
