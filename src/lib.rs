@@ -25,7 +25,37 @@ pub fn install_versions(to_install_versions: Vec<String>) -> Result<()> {
     if to_install_versions.is_empty() {
         println!("Available versions to install:");
 
-        for version in all.keys() {
+        // let's use the reverse order to print out
+        let mut versions: Vec<_> = all.keys().cloned().collect();
+        versions.sort_by(|a, b| {
+            /// returns the (major, minor, patch)
+            fn split_version(s: &str) -> (u32, u32, u32) {
+                let parts: Vec<_> = s.split(".").collect();
+                let mut major = 0;
+                let mut minor = 0;
+                let mut patch = 0;
+                if parts.len() >= 1 {
+                    major = parts[0]
+                        .parse::<u32>()
+                        .expect("failed to parse solidity version");
+                }
+                if parts.len() >= 2 {
+                    minor = parts[1]
+                        .parse::<u32>()
+                        .expect("failed to parse solidity version");
+                }
+                if parts.len() >= 3 {
+                    patch = parts[2]
+                        .parse::<u32>()
+                        .expect("failed to parse solidity version");
+                }
+                (major, minor, patch)
+            }
+
+            split_version(b).cmp(&split_version(a))
+        });
+
+        for version in versions {
             println!("{}", version);
         }
     } else {
